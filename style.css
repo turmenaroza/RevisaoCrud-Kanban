@@ -126,5 +126,39 @@ body {
        border-left:6px 
        solid #ddd; 
     }
+.card .meta{
+     font-size:0.85rem; 
+     color:#666; 
+     margin-top:6px; 
+    }
 
+.card .actions{
+     margin-top:8px; 
+    }
+
+.card button{
+     margin-right:6px; 
+     padding:6px 8px;
+      border-radius:5px;
+       border:none; 
+       cursor:pointer; 
+    }
+.btn-edit{ 
+    background:#f3b631;
+     color:#111;
+     }
+.btn-delete{ 
+    background:#ef4444; 
+    color:white; 
+}
+.btn-status{ 
+    background:#3b82f6;
+     color:white;
+     }
+
+
+.small {
+     font-size:0.85rem; 
+     color:#555;
+     }
 
