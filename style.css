@@ -1,0 +1,130 @@
+
+body { 
+    font-family: Arial, Helvetica, sans-serif; 
+    margin:0; background:#f4f6f8; 
+    color:#222; 
+}
+.container{ 
+    max-width:1100px;
+     margin:20px auto; 
+     padding:20px; 
+     background:white; 
+     box-shadow:0 2px 8px 
+     rgba(0,0,0,.06); 
+     border-radius:6px; 
+    }
+
+.menu{ 
+    background:#1f6feb;
+     color:white; 
+     padding:10px 20px; 
+     display:flex; 
+     justify-content:space-between;
+      align-items:center; 
+    }
+
+.menu a{ 
+    color:white;
+     margin-left:12px; 
+     text-decoration:none; 
+     font-weight:600;
+    }
+
+.brand a{ 
+    color:white; 
+    text-decoration:none; 
+    font-size:1.1rem; 
+    font-weight:bold;
+ }
+
+.user-welcome{
+     margin-right:12px; 
+     font-weight:600; 
+    }
+
+.form {
+     max-width:600px; 
+    }
+
+.form label{
+     display:block;
+      margin-top:12px; 
+      font-weight:600; 
+    }
+.form input[
+    type="text"
+    ],
+    .form input[
+        type="email"
+        ], 
+        .form input[
+            type="password"
+            ], 
+            .form select, 
+.form textarea{ 
+    width:100%;
+    padding:8px; 
+    margin-top:6px; 
+    border:1px solid #cfd8e3;
+     border-radius:4px;
+     }
+.form button {
+     margin-top:12px;
+      padding:10px 16px;
+       border:none; 
+       border-radius:6px; 
+       cursor:pointer; 
+       background:#1f6feb;
+        color:white; 
+        font-weight:700; 
+    }
+
+.message {
+     padding:10px; 
+     border-radius:6px;
+      margin:12px 0;
+     }
+.success {
+     background:#e6fbf0;
+      border:1px solid #b6f0c9;
+       color:#09723b;
+     }
+.error {
+     background:#fdecea;
+      border:1px solid #f7c1bf; 
+      color:#8a1d11; 
+    }
+
+.kanban {
+     display:flex; 
+     gap:16px;
+      margin-top:16px; 
+    }
+
+.column{
+     flex:1;
+      background:#f8fafc;
+       border-radius:6px; 
+       padding:12px; 
+       min-height:200px; 
+       border:1px solid #e6eef8; 
+    }
+.column h3{
+     margin-top:0;
+      text-transform:uppercase;
+       font-size:0.9rem;
+        letter-spacing:0.6px;
+    }
+
+.card{
+     background:white; 
+     padding:10px;
+      margin-bottom:10px; 
+      border-radius:6px; 
+      box-shadow:0 1px 3px 
+      rgba(0,0,0,.04);
+       border-left:6px 
+       solid #ddd; 
+    }
+
+
