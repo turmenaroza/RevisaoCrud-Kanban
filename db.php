@@ -12,12 +12,12 @@ try {
     die("Erro DB: " . $e->getMessage());
 }
 
-// função helper para escapar saída
+
 function e($str) {
     return htmlspecialchars($str, ENT_QUOTES, 'UTF-8');
 }
 
-// checar se usuário está autenticado
+
 function ensure_logged_in() {
     if (empty($_SESSION['user_id'])) {
         header('Location: login.php');
