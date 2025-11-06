@@ -1,27 +1,40 @@
 <?php
-require_once 'config.php';
-ensure_logged_in();
-require_once 'header.php';
+session_start();
+
+
+$servername = "localhost";
+$username = "root";
+$password = "root";
+$dbname = "Tarefas";
+
+$conn = new mysqli($servername, $username, $password, $dbname);
+if ($conn->connect_error) {
+    die("Erro na conexão com o banco de dados: " . $conn->connect_error);
+}
+
+if (!isset($_SESSION['user_id'])) {
+    die("<div class='message error'>Você precisa estar logado para acessar esta página.</div>");
+}
 
 $user_id = $_SESSION['user_id'];
 $errors = [];
 $success = null;
 
-
 $sectors = ['Financeiro','RH','TI','Comercial','Manutenção','Outros'];
-
 
 $editing = false;
 $task = null;
+
+
 if (!empty($_GET['id'])) {
     $id = (int)$_GET['id'];
-    $stmt = $pdo->prepare("SELECT * FROM tasks WHERE id = ? AND user_id = ?");
-    $stmt->execute([$id, $user_id]);
-    $task = $stmt->fetch(PDO::FETCH_ASSOC);
+    $stmt = $conn->prepare("SELECT * FROM tasks WHERE id = ? AND user_id = ?");
+    $stmt->bind_param("ii", $id, $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $task = $result->fetch_assoc();
     if ($task) $editing = true;
-    else {
-        echo '<div class="message error">Tarefa não encontrada ou sem permissão.</div>';
-    }
+    else echo '<div class="message error">Tarefa não encontrada ou sem permissão.</div>';
 }
 
 
@@ -29,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $description = trim($_POST['description'] ?? '');
     $sector = trim($_POST['sector'] ?? '');
     $priority = $_POST['priority'] ?? 'baixa';
-    $status = $_POST['status'] ?? 'a fazer'; 
+    $status = $_POST['status'] ?? 'a fazer';
 
     if ($description === '') $errors[] = "Descrição é obrigatória.";
     if ($sector === '') $errors[] = "Setor é obrigatório.";
@@ -37,51 +50,69 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!in_array($status, ['a fazer','fazendo','pronto'])) $errors[] = "Status inválido.";
 
     if (empty($errors)) {
+      
         if (!empty($_POST['task_id'])) {
-           
-            $stmt = $pdo->prepare("UPDATE tasks SET description = ?, sector = ?, priority = ?, status = ?, updated_at = NOW() WHERE id = ? AND user_id = ?");
-            $stmt->execute([$description, $sector, $priority, $status, (int)$_POST['task_id'], $user_id]);
+            $id = (int)$_POST['task_id'];
+            $stmt = $conn->prepare("UPDATE tasks SET description = ?, sector = ?, priority = ?, status = ?, updated_at = NOW() WHERE id = ? AND user_id = ?");
+            $stmt->bind_param("ssssii", $description, $sector, $priority, $status, $id, $user_id);
+            $stmt->execute();
             $success = "Cadastro concluído com sucesso (tarefa atualizada).";
-        } else {
-          
-            $stmt = $pdo->prepare("INSERT INTO tasks (user_id, description, sector, priority, status) VALUES (?,?,?,?,?)");
-            $stmt->execute([$user_id, $description, $sector, $priority, 'a fazer']);
+        } 
+    
+        else {
+            $stmt = $conn->prepare("INSERT INTO tasks (user_id, description, sector, priority, status) VALUES (?,?,?,?,?)");
+            $status = 'a fazer';
+            $stmt->bind_param("issss", $user_id, $description, $sector, $priority, $status);
+            $stmt->execute();
             $success = "Cadastro concluído com sucesso (tarefa criada).";
-          
             $_POST = [];
-        }
-        
-        if (!empty($_POST['task_id'])) {
-            $stmt = $pdo->prepare("SELECT * FROM tasks WHERE id = ? AND user_id = ?");
-            $stmt->execute([$_POST['task_id'], $user_id]);
-            $task = $stmt->fetch(PDO::FETCH_ASSOC);
         }
     }
 }
 ?>
 
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title><?= $editing ? 'Editar Tarefa' : 'Cadastrar Tarefa' ?></title>
+<link rel="stylesheet" href="../style/styles.css">
+</head>
+<body>
+<main>
+
 <h2><?= $editing ? 'Editar Tarefa' : 'Cadastrar Tarefa' ?></h2>
 
-<?php if ($success): ?><div class="message success"><?= e($success) ?></div><?php endif; ?>
-<?php if (!empty($errors)): ?><div class="message error"><?php foreach ($errors as $er) echo "<div>".e($er)."</div>"; ?></div><?php endif; ?>
+<?php if ($success): ?>
+<div class="message success"><?= htmlspecialchars($success) ?></div>
+<?php endif; ?>
+
+<?php if (!empty($errors)): ?>
+<div class="message error">
+    <?php foreach ($errors as $er) echo "<div>" . htmlspecialchars($er) . "</div>"; ?>
+</div>
+<?php endif; ?>
 
 <form method="post" class="form" id="taskForm">
-    <input type="hidden" name="task_id" value="<?= e($task['id'] ?? '') ?>">
+    <input type="hidden" name="task_id" value="<?= htmlspecialchars($task['id'] ?? '') ?>">
 
     <label>Descrição *</label>
-    <textarea name="description" id="description" rows="4" required><?= e($_POST['description'] ?? $task['description'] ?? '') ?></textarea>
+    <textarea name="description" id="description" rows="4" required><?= htmlspecialchars($_POST['description'] ?? $task['description'] ?? '') ?></textarea>
 
-    <div class="small">Precisa de ajuda? <button type="button" id="suggestBtn">Sugerir descrição (API)</button></div>
+    <div class="small">
+        Precisa de ajuda? 
+        <button type="button" id="suggestBtn">Sugerir descrição (API)</button>
+    </div>
 
     <label>Setor *</label>
-    <input list="sectors" name="sector" value="<?= e($_POST['sector'] ?? $task['sector'] ?? '') ?>" required>
+    <input list="sectors" name="sector" value="<?= htmlspecialchars($_POST['sector'] ?? $task['sector'] ?? '') ?>" required>
     <datalist id="sectors">
-        <?php foreach ($sectors as $s): ?><option value="<?= e($s) ?>"><?php endforeach; ?>
+        <?php foreach ($sectors as $s): ?><option value="<?= htmlspecialchars($s) ?>"><?php endforeach; ?>
     </datalist>
 
     <label>Prioridade *</label>
+    <?php $sel = $_POST['priority'] ?? $task['priority'] ?? 'baixa'; ?>
     <select name="priority">
-        <?php $sel = $_POST['priority'] ?? $task['priority'] ?? 'baixa'; ?>
         <option value="baixa" <?= $sel==='baixa' ? 'selected' : '' ?>>Baixa</option>
         <option value="media" <?= $sel==='media' ? 'selected' : '' ?>>Média</option>
         <option value="alta" <?= $sel==='alta' ? 'selected' : '' ?>>Alta</option>
@@ -101,7 +132,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </form>
 
 <script>
-
 document.getElementById('suggestBtn').addEventListener('click', async function(){
     const btn = this;
     btn.disabled = true;
@@ -124,4 +154,6 @@ document.getElementById('suggestBtn').addEventListener('click', async function()
 });
 </script>
 
-</main></body></html>
+</main>
+</body>
+</html>

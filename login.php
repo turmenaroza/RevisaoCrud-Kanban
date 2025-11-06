@@ -1,5 +1,5 @@
 <?php
-require_once 'config.php';
+require_once 'db.php';
 if (!empty($_SESSION['user_id'])) {
     header('Location: tasks_manage.php');
     exit;
